@@ -23,12 +23,6 @@
                             600: '#0369a1',
                             900: '#0c4a6e',
                             glow: '#38bdf8'
-                        },
-                        dark: {
-                            900: '#0b0f17',
-                            800: '#111827',
-                            700: '#1f2937',
-                            600: '#374151'
                         }
                     },
                     fontFamily: {
@@ -46,7 +40,7 @@
             color: #f3f4f6;
         }
         .glass-panel {
-            background: rgba(17, 24, 39, 0.75);
+            background: rgba(17, 24, 39, 0.85);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
@@ -57,9 +51,9 @@
             transition: all 0.2s ease-in-out;
         }
         .glass-card:hover {
-            border-color: rgba(56, 189, 248, 0.3);
+            border-color: rgba(56, 189, 248, 0.4);
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.6);
         }
         .brand-glow {
             box-shadow: 0 0 25px -5px rgba(56, 189, 248, 0.3);
@@ -69,21 +63,11 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.6);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(51, 65, 85, 0.8);
-            border-radius: 4px;
-        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white">
 
-    <!-- TOP HEADER BAR -->
+    <!-- TOP HEADER -->
     <header class="glass-panel border-b border-white/10 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
         <div class="flex items-center space-x-4">
             <div class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-900 border border-brand-glow/40 brand-glow">
@@ -92,7 +76,7 @@
             <div>
                 <div class="flex items-center space-x-2">
                     <span class="text-xl font-extrabold tracking-wider brand-text-gradient">OmniACES</span>
-                    <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-brand-500/10 border border-brand-500/30 text-brand-glow">v2.0 Real-Time</span>
+                    <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-brand-500/10 border border-brand-500/30 text-brand-glow">v3.0 Live</span>
                 </div>
                 <p class="text-xs text-gray-400 font-medium">Omnibus Allocation, Crew & Equipment Sync</p>
             </div>
@@ -100,19 +84,19 @@
 
         <div id="headerActions" class="hidden flex items-center space-x-4">
             <div class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="syncDot" class="w-2 h-2 rounded-full bg-amber-500"></span>
                 <span id="headerDepotCode" class="text-white font-bold">DEPOT: ----</span>
             </div>
-            <button onclick="logout()" class="px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-all">
-                <i class="fa-solid fa-arrow-right-from-bracket mr-1.5"></i> Exit Screen
+            <button onclick="app.logout()" class="px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-all">
+                <i class="fa-solid fa-arrow-right-from-bracket mr-1.5"></i> Exit Terminal
             </button>
         </div>
     </header>
 
-    <!-- MAIN CONTAINER -->
+    <!-- MAIN APP CONTAINER -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
 
-        <!-- 1. LAUNCH GATE -->
+        <!-- 1. LAUNCH GATE VIEW -->
         <div id="viewLaunchGate" class="max-w-md w-full mx-auto">
             <div class="glass-panel rounded-2xl p-8 border border-white/10 shadow-2xl relative overflow-hidden">
                 <div class="absolute -top-12 -right-12 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl"></div>
@@ -121,33 +105,29 @@
                     <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600 to-brand-500 mb-4 brand-glow text-white text-2xl">
                         <i class="fa-solid fa-bus"></i>
                     </div>
-                    <h1 class="text-2xl font-bold text-white mb-1">Terminal Launch</h1>
-                    <p class="text-sm text-gray-400">Enter assigned Depot Code or Master Key</p>
+                    <h1 class="text-2xl font-bold text-white mb-1">Terminal Sign-In</h1>
+                    <p class="text-sm text-gray-400">Enter depot code to access live operations board</p>
                 </div>
 
-                <form onsubmit="handleLogin(event)" class="space-y-5">
+                <form onsubmit="app.handleLogin(event)" class="space-y-5">
                     <div>
                         <label class="block text-xs font-mono uppercase text-gray-400 mb-2">Depot Access Code</label>
                         <div class="relative">
-                            <input type="text" id="depotCodeInput" required placeholder="e.g. COLAC or SYV" 
+                            <input type="text" id="depotCodeInput" required autocomplete="off"
                                    class="w-full bg-black/40 border border-white/10 focus:border-brand-500 rounded-xl px-4 py-3.5 text-white font-mono tracking-wider text-center text-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 uppercase">
                             <i class="fa-solid fa-key absolute right-4 top-4 text-gray-500"></i>
                         </div>
                     </div>
 
                     <button type="submit" class="w-full bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 brand-glow">
-                        <span>Access Terminal</span>
+                        <span>Authenticate</span>
                         <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                 </form>
-
-                <div class="mt-6 text-center text-xs text-gray-500 font-mono">
-                    Master Control Gateway: <span class="text-brand-glow font-bold">SYV</span>
-                </div>
             </div>
         </div>
 
-        <!-- 2. MAIN ALLOCATION BOARD -->
+        <!-- 2. MAIN ALLOCATION BOARD VIEW -->
         <div id="viewAllocationBoard" class="hidden space-y-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -158,32 +138,32 @@
                 </div>
 
                 <div class="flex items-center space-x-3">
-                    <input type="date" id="filterDate" onchange="renderAllocations()" class="bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-brand-500">
-                    <button onclick="openCoordinatorModal()" class="px-3 py-2 bg-brand-500/20 hover:bg-brand-500/30 text-brand-glow border border-brand-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
+                    <input type="date" id="filterDate" class="bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-brand-500">
+                    <button onclick="app.openCoordinatorModal()" class="px-3 py-2 bg-brand-500/20 hover:bg-brand-500/30 text-brand-glow border border-brand-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
                         <i class="fa-solid fa-user-gear"></i>
                         <span>Coordinator Admin</span>
                     </button>
                 </div>
             </div>
 
-            <!-- ALLOCATION CARDS GRID -->
+            <!-- ALLOCATION GRID -->
             <div id="allocationsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <!-- Rendered dynamically -->
             </div>
         </div>
 
-        <!-- 3. MASTER CONTROL PORTAL (SYV) -->
+        <!-- 3. SYV MASTER CONTROL PORTAL -->
         <div id="viewMasterPortal" class="hidden space-y-6">
             <div class="glass-panel p-6 rounded-2xl border border-brand-500/30">
                 <div class="flex items-center justify-between mb-6">
                     <div>
-                        <span class="px-2.5 py-1 rounded bg-purple-500/10 border border-purple-500/30 text-purple-400 font-mono text-xs font-bold uppercase">Master Portal</span>
-                        <h2 class="text-2xl font-bold text-white mt-2">SYV Fleet Control</h2>
-                        <p class="text-sm text-gray-400">Provision depots and manage global running boards</p>
+                        <span class="px-2.5 py-1 rounded bg-purple-500/10 border border-purple-500/30 text-purple-400 font-mono text-xs font-bold uppercase">Master Control</span>
+                        <h2 class="text-2xl font-bold text-white mt-2">SYV Portal Gateway</h2>
+                        <p class="text-sm text-gray-400">Provision depots, configure fleet rules, and manage all terminals</p>
                     </div>
-                    <button onclick="openAddDepotModal()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-semibold flex items-center gap-2 brand-glow">
+                    <button onclick="app.openAddDepotModal()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-semibold flex items-center gap-2 brand-glow">
                         <i class="fa-solid fa-plus"></i>
-                        <span>Provision Depot</span>
+                        <span>Register New Depot</span>
                     </button>
                 </div>
 
@@ -196,28 +176,26 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="glass-panel border-t border-white/10 px-6 py-3 text-center text-xs text-gray-500 flex flex-col md:flex-row items-center justify-between gap-2">
-        <div>OmniACES Operations Terminal &bull; Firebase Real-Time Sync Active</div>
-        <div class="font-mono text-[11px] text-gray-400">Secure Gateway v2.0</div>
+    <footer class="glass-panel border-t border-white/10 px-6 py-3 text-center text-xs text-gray-500 flex items-center justify-between">
+        <div>Syverro Group Software &bull; OmniACES Terminal</div>
+        <div class="font-mono text-[11px] text-gray-400">Cloud Firestore Synchronized</div>
     </footer>
 
-    <!-- DETAIL MODAL -->
+    <!-- EXPAND DETAIL MODAL -->
     <div id="detailModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-        <div class="glass-panel max-w-2xl w-full rounded-2xl border border-white/20 p-6 space-y-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div class="glass-panel max-w-2xl w-full rounded-2xl border border-white/20 p-6 space-y-6 relative max-h-[90vh] overflow-y-auto">
             <div class="flex items-start justify-between">
                 <div>
                     <span id="modalBoardBadge" class="px-2 py-0.5 rounded bg-brand-500/20 text-brand-glow border border-brand-500/30 font-mono text-xs">BOARD #---</span>
                     <h3 id="modalDriverName" class="text-2xl font-bold text-white mt-1">Driver Name</h3>
                     <p id="modalRouteService" class="text-xs text-gray-400">Route Details</p>
                 </div>
-                <button onclick="closeModal('detailModal')" class="text-gray-400 hover:text-white p-2 text-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <button onclick="app.closeModal('detailModal')" class="text-gray-400 hover:text-white p-2 text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
             <div class="grid grid-cols-2 gap-2 bg-black/40 p-1 rounded-xl text-xs font-semibold text-center">
-                <button id="tabSheetBtn" onclick="switchModalTab('sheet')" class="py-2 rounded-lg bg-brand-500 text-white">Running Sheet PDF</button>
-                <button id="tabVehicleBtn" onclick="switchModalTab('vehicle')" class="py-2 rounded-lg text-gray-400 hover:text-white">Vehicle Specs</button>
+                <button id="tabSheetBtn" onclick="app.switchModalTab('sheet')" class="py-2 rounded-lg bg-brand-500 text-white">Running Sheet PDF</button>
+                <button id="tabVehicleBtn" onclick="app.switchModalTab('vehicle')" class="py-2 rounded-lg text-gray-400 hover:text-white">Vehicle Specs</button>
             </div>
 
             <!-- SHEET TAB -->
@@ -259,30 +237,22 @@
                         <div class="text-gray-400">Chassis / Fleet</div>
                         <div id="modalBusChassis" class="text-white font-bold text-sm">---</div>
                     </div>
-                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
-                        <div class="text-gray-400">Capacity</div>
-                        <div id="modalBusCapacity" class="text-white font-bold text-sm">57 Seater</div>
-                    </div>
-                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
-                        <div class="text-gray-400">Status</div>
-                        <div id="modalBusStatus" class="text-emerald-400 font-bold text-sm">Operational</div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- COORDINATOR ADMIN MODAL -->
+    <!-- COORDINATOR ALLOCATION MODAL -->
     <div id="coordinatorModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="glass-panel max-w-lg w-full rounded-2xl border border-white/20 p-6 space-y-5">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-bold text-white">Coordinator Roster Manager</h3>
-                <button onclick="closeModal('coordinatorModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="app.closeModal('coordinatorModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <form onsubmit="handleCreateAllocation(event)" class="space-y-3 font-mono text-xs">
+            <form onsubmit="app.handleCreateAllocation(event)" class="space-y-3 font-mono text-xs">
                 <div>
                     <label class="block text-gray-400 mb-1">Board Number</label>
-                    <input type="text" id="newBoardNo" required placeholder="e.g. RB-103" class="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white">
+                    <input type="text" id="newBoardNo" required placeholder="e.g. RB-101" class="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white">
                 </div>
                 <div>
                     <label class="block text-gray-400 mb-1">Driver Name</label>
@@ -291,242 +261,332 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-gray-400 mb-1">Bus Rego / ID</label>
-                        <input type="text" id="newVehicle" required placeholder="BUS-10 (XX00YY)" class="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white">
+                        <input type="text" id="newVehicle" required placeholder="BUS-44 (BS06XY)" class="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white">
                     </div>
                     <div>
-                        <label class="block text-gray-400 mb-1">Sign On</label>
-                        <input type="text" id="newSignOn" required placeholder="06:00" class="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white">
+                        <label class="block text-gray-400 mb-1">Sign On Time</label>
+                        <input type="text" id="newSignOn" required placeholder="06:15" class="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-gray-400 mb-1">Route / Service Description</label>
-                    <input type="text" id="newRoute" required placeholder="Route 12 - Town Service" class="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white">
+                    <label class="block text-gray-400 mb-1">Route Description</label>
+                    <input type="text" id="newRoute" required placeholder="Route 40 - Express Town Loop" class="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white">
                 </div>
                 <button type="submit" class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl brand-glow mt-2">Publish Allocation</button>
             </form>
         </div>
     </div>
 
-    <!-- FIREBASE SDK & APP LOGIC -->
+    <!-- NEW DEPOT PROVISION MODAL (SYV MASTER) -->
+    <div id="addDepotModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="glass-panel max-w-md w-full rounded-2xl border border-white/20 p-6 space-y-5">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white">Provision New Depot</h3>
+                <button onclick="app.closeModal('addDepotModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="app.handleCreateDepot(event)" class="space-y-3 font-mono text-xs">
+                <div>
+                    <label class="block text-gray-400 mb-1">Depot Code (Unique)</label>
+                    <input type="text" id="newDepotCode" required placeholder="e.g. COLAC" class="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white uppercase">
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-1">Depot Full Name</label>
+                    <input type="text" id="newDepotName" required placeholder="Colac Central Depot" class="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white">
+                </div>
+                <button type="submit" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl mt-2">Register Depot</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FIREBASE & APPLICATION CORE SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, adddoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, setDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // REPLACE WITH YOUR FIREBASE CONFIG
-      const firebaseConfig = {
-          apiKey: "AIzaSyBV2gXoJS874oru1q_YEPxLIssTH5p4ntM",
-          authDomain: "omniaces-27cac.firebaseapp.com",
-          projectId: "omniaces-27cac",
-          storageBucket: "omniaces-27cac.firebasestorage.app",
-          messagingSenderId: "280448119898",
-          appId: "1:280448119898:web:bcf2b24194e18c3feb1463"
+        const firebaseConfig = {
+            apiKey: "AIzaSyBV2gXoJS874oru1q_YEPxLIssTH5p4ntM",
+            authDomain: "omniaces-27cac.firebaseapp.com",
+            projectId: "omniaces-27cac",
+            storageBucket: "omniaces-27cac.firebasestorage.app",
+            messagingSenderId: "280448119898",
+            appId: "1:280448119898:web:bcf2b24194e18c3feb1463"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const firebaseApp = initializeApp(firebaseConfig);
+        const db = getFirestore(firebaseApp);
 
-        window.appState = {
-            activeDepot: null,
-            allocations: [],
-            depots: {
-                'COLAC': { name: 'Colac Central Depot', code: 'COLAC' },
-                'BALLARAT': { name: 'Ballarat Regional Depot', code: 'BALLARAT' }
-            }
-        };
-
-        // EXPOSE FIREBASE HELPERS GLOBALLY
-        window.dbInstance = db;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('filterDate').value = today;
-            
-            // Seed sample local data if offline or first load
-            window.appState.allocations = [
-                { id: '1', depotCode: 'COLAC', boardNo: 'RB-101', driver: 'Angus Ferrari', vehicle: 'BUS-44 (BS06XY)', chassis: 'Scania K310IB / Volgren', route: 'Route 40 - Express Town Loop', signOn: '06:15', exit: '06:30', meal: '11:30 - 12:15', signOff: '15:00', status: 'On Road' },
-                { id: '2', depotCode: 'COLAC', boardNo: 'RB-102', driver: 'John Smith', vehicle: 'BUS-12 (BS02AB)', chassis: 'Volvo B7R / Custom', route: 'School Run #4 - High School', signOn: '07:00', exit: '07:20', meal: '12:00 - 12:45', signOff: '16:15', status: 'Pending' }
-            ];
-        });
-    </script>
-
-    <script>
-    function handleLogin(e) {
-        if (e) e.preventDefault();
-    
-        const input = document.getElementById('depotCodeInput');
-        if (!input) return;
-    
-        const code = input.value.trim().toUpperCase();
-        if (!code) {
-            alert('Please enter a Depot Access Code.');
-            return;
-        }
-    
-        // Master Access Gateway
-        if (code === 'SYV') {
-            window.appState.activeDepot = 'SYV';
-            showView('viewMasterPortal');
-            renderMasterPortal();
-            return;
-        }
-    
-        // Auto-create or load dynamic depot code on the fly
-        if (!window.appState.depots[code]) {
-            window.appState.depots[code] = { 
-                name: `${code} Depot Operations`, 
-                code: code 
-            };
-        }
-    
-        window.appState.activeDepot = code;
-        showView('viewAllocationBoard');
-        renderAllocations();
-    }
-
-
-        function showView(viewId) {
-            ['viewLaunchGate', 'viewAllocationBoard', 'viewMasterPortal'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            document.getElementById(viewId).classList.remove('hidden');
-            
-            const headerActions = document.getElementById('headerActions');
-            if (viewId !== 'viewLaunchGate') {
-                headerActions.classList.remove('hidden');
-                document.getElementById('headerDepotCode').innerText = `DEPOT: ${window.appState.activeDepot}`;
-            } else {
-                headerActions.classList.add('hidden');
-            }
-        }
-
-        function renderAllocations() {
-            const grid = document.getElementById('allocationsGrid');
-            const depotData = window.appState.depots[window.appState.activeDepot] || { name: window.appState.activeDepot };
-            document.getElementById('depotTitleHeader').innerText = `${depotData.name} Allocations`;
-
-            const filtered = window.appState.allocations.filter(a => a.depotCode === window.appState.activeDepot);
-
-            if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500 font-mono text-sm">No running board allocations found. Use Coordinator Admin to add shifts.</div>`;
-                return;
+        class OmniACESApp {
+            constructor() {
+                this.db = db;
+                this.state = {
+                    activeDepot: null,
+                    depots: {},
+                    allocations: []
+                };
+                this.unsubscribeAllocations = null;
+                this.init();
             }
 
-            grid.innerHTML = filtered.map(item => `
-                <div onclick="openDetailModal('${item.id}')" class="glass-card rounded-2xl p-5 border border-white/10 cursor-pointer space-y-4 relative overflow-hidden">
-                    <div class="flex items-center justify-between">
-                        <span class="px-2.5 py-1 rounded bg-brand-500/20 text-brand-glow border border-brand-500/30 text-xs font-mono font-semibold">${item.boardNo}</span>
-                        <span class="px-2.5 py-1 rounded ${item.status === 'On Road' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'} text-xs font-semibold">${item.status}</span>
-                    </div>
+            async init() {
+                const today = new Date().toISOString().split('T')[0];
+                const dateInput = document.getElementById('filterDate');
+                if (dateInput) dateInput.value = today;
 
-                    <div>
-                        <div class="text-xs text-gray-400 font-mono">DRIVER</div>
-                        <div class="text-lg font-bold text-white">${item.driver}</div>
-                        <div class="text-xs text-brand-glow font-medium mt-0.5">${item.route}</div>
-                    </div>
+                await this.fetchDepots();
+            }
 
-                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 font-mono text-xs">
-                        <div>
-                            <span class="text-gray-500 block text-[10px]">VEHICLE</span>
-                            <span class="text-white font-semibold">${item.vehicle}</span>
+            async fetchDepots() {
+                try {
+                    const querySnapshot = await getDocs(collection(this.db, "depots"));
+                    this.state.depots = {};
+                    querySnapshot.forEach((docSnap) => {
+                        this.state.depots[docSnap.id] = docSnap.data();
+                    });
+                } catch (err) {
+                    console.error("Error fetching depots from Firestore:", err);
+                }
+            }
+
+            async handleLogin(e) {
+                if (e) e.preventDefault();
+                const input = document.getElementById('depotCodeInput');
+                if (!input) return;
+                
+                const code = input.value.trim().toUpperCase();
+                
+                if (code === 'SYV') {
+                    await this.fetchDepots();
+                    this.state.activeDepot = 'SYV';
+                    this.showView('viewMasterPortal');
+                    this.renderMasterPortal();
+                    return;
+                }
+
+                await this.fetchDepots();
+
+                if (this.state.depots[code]) {
+                    this.state.activeDepot = code;
+                    this.showView('viewAllocationBoard');
+                    this.startRealtimeSync(code);
+                    return;
+                }
+
+                alert('Access Denied: Unrecognized Depot Access Code.');
+            }
+
+            startRealtimeSync(depotCode) {
+                if (this.unsubscribeAllocations) {
+                    this.unsubscribeAllocations();
+                }
+
+                const syncDot = document.getElementById('syncDot');
+                if (syncDot) syncDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+
+                this.unsubscribeAllocations = onSnapshot(collection(this.db, "allocations"), (snapshot) => {
+                    this.state.allocations = [];
+                    snapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
+                        if (data.depotCode === depotCode) {
+                            this.state.allocations.push({ id: docSnap.id, ...data });
+                        }
+                    });
+                    this.renderAllocations();
+                }, (error) => {
+                    console.error("Firestore sync error:", error);
+                    if (syncDot) syncDot.className = "w-2 h-2 rounded-full bg-red-500";
+                });
+            }
+
+            showView(viewId) {
+                ['viewLaunchGate', 'viewAllocationBoard', 'viewMasterPortal'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.add('hidden');
+                });
+                
+                const target = document.getElementById(viewId);
+                if (target) target.classList.remove('hidden');
+
+                const headerActions = document.getElementById('headerActions');
+                if (viewId !== 'viewLaunchGate') {
+                    headerActions.classList.remove('hidden');
+                    document.getElementById('headerDepotCode').innerText = `DEPOT: ${this.state.activeDepot}`;
+                } else {
+                    headerActions.classList.add('hidden');
+                }
+            }
+
+            renderAllocations() {
+                const grid = document.getElementById('allocationsGrid');
+                if (!grid) return;
+
+                const depotData = this.state.depots[this.state.activeDepot] || { name: this.state.activeDepot };
+                document.getElementById('depotTitleHeader').innerText = `${depotData.name} Allocations`;
+
+                const filtered = this.state.allocations;
+
+                if (filtered.length === 0) {
+                    grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500 font-mono text-sm">No running board allocations found. Use Coordinator Admin to publish shifts.</div>`;
+                    return;
+                }
+
+                grid.innerHTML = filtered.map(item => `
+                    <div onclick="app.openDetailModal('${item.id}')" class="glass-card rounded-2xl p-5 border border-white/10 cursor-pointer space-y-4 relative overflow-hidden">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 rounded bg-brand-500/20 text-brand-glow border border-brand-500/30 text-xs font-mono font-semibold">${item.boardNo}</span>
+                            <span class="px-2.5 py-1 rounded ${item.status === 'On Road' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'} text-xs font-semibold">${item.status}</span>
                         </div>
                         <div>
-                            <span class="text-gray-500 block text-[10px]">SIGN ON</span>
-                            <span class="text-white font-semibold">${item.signOn}</span>
+                            <div class="text-xs text-gray-400 font-mono">DRIVER</div>
+                            <div class="text-lg font-bold text-white">${item.driver}</div>
+                            <div class="text-xs text-brand-glow font-medium mt-0.5">${item.route}</div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 font-mono text-xs">
+                            <div>
+                                <span class="text-gray-500 block text-[10px]">VEHICLE</span>
+                                <span class="text-white font-semibold">${item.vehicle}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500 block text-[10px]">SIGN ON</span>
+                                <span class="text-white font-semibold">${item.signOn}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
-        }
+                `).join('');
+            }
 
-        function renderMasterPortal() {
-            const grid = document.getElementById('masterDepotsGrid');
-            grid.innerHTML = Object.values(window.appState.depots).map(d => `
-                <div class="glass-panel p-5 rounded-xl border border-white/10 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono text-xs">${d.code}</span>
-                        <i class="fa-solid fa-building text-gray-400"></i>
-                    </div>
-                    <h4 class="font-bold text-white text-lg">${d.name}</h4>
-                    <button onclick="accessDepotFromMaster('${d.code}')" class="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white rounded-lg transition-all">Launch Depot Screen</button>
-                </div>
-            `).join('');
-        }
+            renderMasterPortal() {
+                const grid = document.getElementById('masterDepotsGrid');
+                if (!grid) return;
 
-        function accessDepotFromMaster(code) {
-            window.appState.activeDepot = code;
-            showView('viewAllocationBoard');
-            renderAllocations();
-        }
+                const depotKeys = Object.keys(this.state.depots);
+                if (depotKeys.length === 0) {
+                    grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500 font-mono text-sm">No depots provisioned yet. Click 'Register New Depot' above.</div>`;
+                    return;
+                }
 
-        function openCoordinatorModal() {
-            document.getElementById('coordinatorModal').classList.remove('hidden');
-            document.getElementById('coordinatorModal').classList.add('flex');
-        }
+                grid.innerHTML = depotKeys.map(key => {
+                    const d = this.state.depots[key];
+                    return `
+                        <div class="glass-panel p-5 rounded-xl border border-white/10 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono text-xs">${d.code}</span>
+                                <i class="fa-solid fa-building text-gray-400"></i>
+                            </div>
+                            <h4 class="font-bold text-white text-lg">${d.name}</h4>
+                            <button onclick="app.accessDepotFromMaster('${d.code}')" class="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white rounded-lg transition-all">Launch Terminal</button>
+                        </div>
+                    `;
+                }).join('');
+            }
 
-        function handleCreateAllocation(e) {
-            e.preventDefault();
-            const newItem = {
-                id: Date.now().toString(),
-                depotCode: window.appState.activeDepot,
-                boardNo: document.getElementById('newBoardNo').value.trim(),
-                driver: document.getElementById('newDriver').value.trim(),
-                vehicle: document.getElementById('newVehicle').value.trim(),
-                chassis: 'Standard Fleet Bus',
-                route: document.getElementById('newRoute').value.trim(),
-                signOn: document.getElementById('newSignOn').value.trim(),
-                exit: '06:30',
-                meal: '12:00 - 12:30',
-                signOff: '15:30',
-                status: 'On Road'
-            };
+            async accessDepotFromMaster(code) {
+                this.state.activeDepot = code;
+                this.showView('viewAllocationBoard');
+                this.startRealtimeSync(code);
+            }
 
-            window.appState.allocations.push(newItem);
-            closeModal('coordinatorModal');
-            renderAllocations();
-        }
+            openCoordinatorModal() {
+                document.getElementById('coordinatorModal').classList.remove('hidden');
+                document.getElementById('coordinatorModal').classList.add('flex');
+            }
 
-        function openDetailModal(id) {
-            const item = window.appState.allocations.find(a => a.id === id);
-            if (!item) return;
+            openAddDepotModal() {
+                document.getElementById('addDepotModal').classList.remove('hidden');
+                document.getElementById('addDepotModal').classList.add('flex');
+            }
 
-            document.getElementById('modalBoardBadge').innerText = item.boardNo;
-            document.getElementById('modalDriverName').innerText = item.driver;
-            document.getElementById('modalRouteService').innerText = item.route;
-            document.getElementById('modalSignOn').innerText = item.signOn;
-            document.getElementById('modalExit').innerText = item.exit;
-            document.getElementById('modalMeal').innerText = item.meal;
-            document.getElementById('modalSignOff').innerText = item.signOff;
-            document.getElementById('modalBusReg').innerText = item.vehicle;
-            document.getElementById('modalBusChassis').innerText = item.chassis;
+            closeModal(modalId) {
+                document.getElementById(modalId).classList.add('hidden');
+                document.getElementById(modalId).classList.remove('flex');
+            }
 
-            document.getElementById('detailModal').classList.remove('hidden');
-            document.getElementById('detailModal').classList.add('flex');
-        }
+            async handleCreateAllocation(e) {
+                e.preventDefault();
+                const id = 'alloc_' + Date.now();
+                const newItem = {
+                    depotCode: this.state.activeDepot,
+                    boardNo: document.getElementById('newBoardNo').value.trim(),
+                    driver: document.getElementById('newDriver').value.trim(),
+                    vehicle: document.getElementById('newVehicle').value.trim(),
+                    chassis: 'Standard Fleet Bus',
+                    route: document.getElementById('newRoute').value.trim(),
+                    signOn: document.getElementById('newSignOn').value.trim(),
+                    exit: '06:30',
+                    meal: '12:00 - 12:30',
+                    signOff: '15:30',
+                    status: 'On Road'
+                };
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-            document.getElementById(modalId).classList.remove('flex');
-        }
+                try {
+                    await setDoc(doc(this.db, "allocations", id), newItem);
+                    this.closeModal('coordinatorModal');
+                } catch (err) {
+                    console.error("Error writing allocation to Firestore:", err);
+                    alert("Failed to publish allocation. Check console.");
+                }
+            }
 
-        function switchModalTab(tab) {
-            if (tab === 'sheet') {
-                document.getElementById('tabSheetContent').classList.remove('hidden');
-                document.getElementById('tabVehicleContent').classList.add('hidden');
-                document.getElementById('tabSheetBtn').className = 'py-2 rounded-lg bg-brand-500 text-white';
-                document.getElementById('tabVehicleBtn').className = 'py-2 rounded-lg text-gray-400 hover:text-white';
-            } else {
-                document.getElementById('tabSheetContent').classList.add('hidden');
-                document.getElementById('tabVehicleContent').classList.remove('hidden');
-                document.getElementById('tabSheetBtn').className = 'py-2 rounded-lg text-gray-400 hover:text-white';
-                document.getElementById('tabVehicleBtn').className = 'py-2 rounded-lg bg-brand-500 text-white';
+            async handleCreateDepot(e) {
+                e.preventDefault();
+                const code = document.getElementById('newDepotCode').value.trim().toUpperCase();
+                const name = document.getElementById('newDepotName').value.trim();
+
+                try {
+                    await setDoc(doc(this.db, "depots", code), { code, name });
+                    this.state.depots[code] = { code, name };
+                    this.closeModal('addDepotModal');
+                    this.renderMasterPortal();
+                } catch (err) {
+                    console.error("Error writing depot to Firestore:", err);
+                    alert("Failed to register depot. Check console.");
+                }
+            }
+
+            openDetailModal(id) {
+                const item = this.state.allocations.find(a => a.id === id);
+                if (!item) return;
+
+                document.getElementById('modalBoardBadge').innerText = item.boardNo;
+                document.getElementById('modalDriverName').innerText = item.driver;
+                document.getElementById('modalRouteService').innerText = item.route;
+                document.getElementById('modalSignOn').innerText = item.signOn;
+                document.getElementById('modalExit').innerText = item.exit;
+                document.getElementById('modalMeal').innerText = item.meal;
+                document.getElementById('modalSignOff').innerText = item.signOff;
+                document.getElementById('modalBusReg').innerText = item.vehicle;
+                document.getElementById('modalBusChassis').innerText = item.chassis;
+
+                document.getElementById('detailModal').classList.remove('hidden');
+                document.getElementById('detailModal').classList.add('flex');
+            }
+
+            switchModalTab(tab) {
+                if (tab === 'sheet') {
+                    document.getElementById('tabSheetContent').classList.remove('hidden');
+                    document.getElementById('tabVehicleContent').classList.add('hidden');
+                    document.getElementById('tabSheetBtn').className = 'py-2 rounded-lg bg-brand-500 text-white';
+                    document.getElementById('tabVehicleBtn').className = 'py-2 rounded-lg text-gray-400 hover:text-white';
+                } else {
+                    document.getElementById('tabSheetContent').classList.add('hidden');
+                    document.getElementById('tabVehicleContent').classList.remove('hidden');
+                    document.getElementById('tabSheetBtn').className = 'py-2 rounded-lg text-gray-400 hover:text-white';
+                    document.getElementById('tabVehicleBtn').className = 'py-2 rounded-lg bg-brand-500 text-white';
+                }
+            }
+
+            logout() {
+                if (this.unsubscribeAllocations) {
+                    this.unsubscribeAllocations();
+                }
+                this.state.activeDepot = null;
+                const input = document.getElementById('depotCodeInput');
+                if (input) input.value = '';
+                this.showView('viewLaunchGate');
             }
         }
 
-        function logout() {
-            window.appState.activeDepot = null;
-            document.getElementById('depotCodeInput').value = '';
-            showView('viewLaunchGate');
-        }
+        // Initialize App Global Instance
+        window.app = new OmniACESApp();
     </script>
 </body>
 </html>
