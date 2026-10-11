@@ -1,4 +1,4 @@
-# # OmniACES (Omnibus Allocation, Crew & Equipment Sync)
+# OmniACES (Omnibus Allocation, Crew & Equipment Sync)
 
 OmniACES is a modern, web-based depot kiosk management system designed for transport operations. It features real-time running board allocations, click-to-expand driver and bus schedules, and a multi-tenant master gateway.
 
@@ -14,4 +14,4 @@ This project is self-contained in a single `index.html` file and requires no bui
 - **Vercel**
 - **Netlify**
 
-
+https://syverro.github.io/OmniACES/
