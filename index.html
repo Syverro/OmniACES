@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniACES | Omnibus Allocation, Crew & Equipment Sync</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            900: '#0c4a6e',
+                            glow: '#38bdf8'
+                        },
+                        dark: {
+                            900: '#0b0f17',
+                            800: '#111827',
+                            700: '#1f2937',
+                            600: '#374151'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #07090e;
+            color: #f3f4f6;
+        }
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card {
+            background: rgba(31, 41, 55, 0.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.5);
+        }
+        .brand-glow {
+            box-shadow: 0 0 25px -5px rgba(56, 189, 248, 0.3);
+        }
+        .brand-text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(51, 65, 85, 0.8);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white">
+
+    <!-- TOP HEADER BAR -->
+    <header id="mainHeader" class="glass-panel border-b border-white/10 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center space-x-4">
+            <div class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-900 border border-brand-glow/40 brand-glow">
+                <i class="fa-solid fa-layer-group text-white text-lg"></i>
+            </div>
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xl font-extrabold tracking-wider brand-text-gradient">OmniACES</span>
+                    <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-brand-500/10 border border-brand-500/30 text-brand-glow">v2.0</span>
+                </div>
+                <p class="text-xs text-gray-400 font-medium">Omnibus Allocation, Crew & Equipment Sync</p>
+            </div>
+        </div>
+
+        <div id="headerActions" class="hidden flex items-center space-x-4">
+            <div id="activeDepotBadge" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="headerDepotCode" class="text-white font-bold">DEPOT: ----</span>
+            </div>
+            <button onclick="logout()" class="px-3 py-1.5 text-xs font-medium text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-all">
+                <i class="fa-solid fa-arrow-right-from-bracket mr-1.5"></i> Exit Screen
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
+
+        <!-- 1. LAUNCH GATE (ENTRY SCREEN) -->
+        <div id="viewLaunchGate" class="max-w-md w-full mx-auto">
+            <div class="glass-panel rounded-2xl p-8 border border-white/10 shadow-2xl relative overflow-hidden">
+                <div class="absolute -top-12 -right-12 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl"></div>
+                
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600 to-brand-500 mb-4 brand-glow text-white text-2xl">
+                        <i class="fa-solid fa-bus"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-white mb-1">Welcome to OmniACES</h1>
+                    <p class="text-sm text-gray-400">Enter your assigned Depot Access Code to launch terminal</p>
+                </div>
+
+                <form onsubmit="handleLogin(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-mono uppercase text-gray-400 mb-2">Depot Access Code</label>
+                        <div class="relative">
+                            <input type="text" id="depotCodeInput" required uppercase placeholder="e.g. COLAC or SYV" 
+                                   class="w-full bg-black/40 border border-white/10 focus:border-brand-500 rounded-xl px-4 py-3.5 text-white font-mono tracking-wider text-center text-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 uppercase">
+                            <i class="fa-solid fa-key absolute right-4 top-4 text-gray-500"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 brand-glow">
+                        <span>Access Terminal</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center text-xs text-gray-500 font-mono">
+                    System Master Gateway: Input <span class="text-brand-glow font-bold">SYV</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. MAIN ALLOCATION BOARD (DEPOT VIEW) -->
+        <div id="viewAllocationBoard" class="hidden space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 id="depotTitleHeader" class="text-2xl font-bold text-white flex items-center gap-2">
+                        <span>Depot Operations Board</span>
+                    </h2>
+                    <p class="text-sm text-gray-400">Live running board allocations and vehicle rosters</p>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <input type="date" id="filterDate" onchange="renderAllocations()" class="bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-brand-500">
+                    <button onclick="openCoordinatorModal()" class="px-3 py-2 bg-brand-500/20 hover:bg-brand-500/30 text-brand-glow border border-brand-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
+                        <i class="fa-solid fa-user-gear"></i>
+                        <span>Coordinator Admin</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ALLOCATION CARDS GRID -->
+            <div id="allocationsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Dynamic Allocation Cards Rendered Here -->
+            </div>
+        </div>
+
+        <!-- 3. MASTER CONTROL PORTAL (SYV BACKEND) -->
+        <div id="viewMasterPortal" class="hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl border border-brand-500/30">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <span class="px-2.5 py-1 rounded bg-purple-500/10 border border-purple-500/30 text-purple-400 font-mono text-xs font-bold uppercase">Master Access</span>
+                        <h2 class="text-2xl font-bold text-white mt-2">SYV Control Portal</h2>
+                        <p class="text-sm text-gray-400">Manage all registered depots, running boards, and global configurations</p>
+                    </div>
+                    <button onclick="openAddDepotModal()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-semibold flex items-center gap-2 brand-glow">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Provision New Depot</span>
+                    </button>
+                </div>
+
+                <!-- REGISTERED DEPOTS LIST -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="masterDepotsGrid">
+                    <!-- Dynamic Depots Rendered Here -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="glass-panel border-t border-white/10 px-6 py-3 text-center text-xs text-gray-500 flex flex-col md:flex-row items-center justify-between gap-2">
+        <div>OmniACES Operations Terminal &bull; Continuous Sync Active</div>
+        <div class="font-mono text-[11px] text-gray-400">Depot System Gateway Ready</div>
+    </footer>
+
+    <!-- EXPANDABLE RUNNING BOARD MODAL -->
+    <div id="detailModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="glass-panel max-w-2xl w-full rounded-2xl border border-white/20 p-6 space-y-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-start justify-between">
+                <div>
+                    <span id="modalBoardBadge" class="px-2 py-0.5 rounded bg-brand-500/20 text-brand-glow border border-brand-500/30 font-mono text-xs">BOARD #---</span>
+                    <h3 id="modalDriverName" class="text-2xl font-bold text-white mt-1">Driver Name</h3>
+                    <p id="modalRouteService" class="text-xs text-gray-400">Route Details</p>
+                </div>
+                <button onclick="closeModal('detailModal')" class="text-gray-400 hover:text-white p-2 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- TAB SYSTEM -->
+            <div class="grid grid-cols-2 gap-2 bg-black/40 p-1 rounded-xl text-xs font-semibold text-center">
+                <button id="tabSheetBtn" onclick="switchModalTab('sheet')" class="py-2 rounded-lg bg-brand-500 text-white">Running Sheet PDF</button>
+                <button id="tabVehicleBtn" onclick="switchModalTab('vehicle')" class="py-2 rounded-lg text-gray-400 hover:text-white">Vehicle Specs</button>
+            </div>
+
+            <!-- SHEET CONTENT -->
+            <div id="tabSheetContent" class="space-y-4">
+                <div class="bg-black/60 rounded-xl p-4 border border-white/5 space-y-3 font-mono text-xs">
+                    <div class="flex justify-between py-1 border-b border-white/10">
+                        <span class="text-gray-400">Sign On Time:</span>
+                        <span id="modalSignOn" class="text-white font-bold">--:--</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-white/10">
+                        <span class="text-gray-400">Depot Exit:</span>
+                        <span id="modalExit" class="text-white font-bold">--:--</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-white/10">
+                        <span class="text-gray-400">Meal Break:</span>
+                        <span id="modalMeal" class="text-white font-bold">--:--</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                        <span class="text-gray-400">Sign Off Time:</span>
+                        <span id="modalSignOff" class="text-white font-bold">--:--</span>
+                    </div>
+                </div>
+
+                <!-- PDF RUNNING SHEET EMBED / PLACEHOLDER -->
+                <div class="border-2 border-dashed border-white/10 rounded-xl p-8 text-center bg-white/5 flex flex-col items-center justify-center space-y-2">
+                    <i class="fa-solid fa-file-pdf text-3xl text-red-400"></i>
+                    <div class="text-xs font-semibold text-white">Official Running Board PDF Sheet</div>
+                    <div class="text-[11px] text-gray-400">Click to preview full digital document preview</div>
+                    <button class="mt-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-mono">Download PDF</button>
+                </div>
+            </div>
+
+            <!-- VEHICLE SPEC CONTENT -->
+            <div id="tabVehicleContent" class="hidden space-y-4">
+                <div class="grid grid-cols-2 gap-3 text-xs font-mono">
+                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                        <div class="text-gray-400">Bus Registration</div>
+                        <div id="modalBusReg" class="text-white font-bold text-sm">---</div>
+                    </div>
+                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                        <div class="text-gray-400">Chassis / Fleet</div>
+                        <div id="modalBusChassis" class="text-white font-bold text-sm">---</div>
+                    </div>
+                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                        <div class="text-gray-400">Capacity</div>
+                        <div id="modalBusCapacity" class="text-white font-bold text-sm">57 Seater</div>
+                    </div>
+                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                        <div class="text-gray-400">Status</div>
+                        <div id="modalBusStatus" class="text-emerald-400 font-bold text-sm">Operational</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // DEFAULT DEMO DATA FOR SYV BACKEND
+        let state = {
+            activeDepot: null,
+            depots: {
+                'COLAC': { name: 'Colac Central Depot', code: 'COLAC' },
+                'BALLARAT': { name: 'Ballarat Regional Depot', code: 'BALLARAT' }
+            },
+            allocations: [
+                {
+                    id: 1,
+                    depotCode: 'COLAC',
+                    boardNo: 'RB-101',
+                    driver: 'Angus Ferrari',
+                    vehicle: 'BUS-44 (BS06XY)',
+                    chassis: 'Scania K310IB / Volgren',
+                    route: 'Route 40 - Express Town Loop',
+                    signOn: '06:15',
+                    exit: '06:30',
+                    meal: '11:30 - 12:15',
+                    signOff: '15:00',
+                    status: 'On Road'
+                },
+                {
+                    id: 2,
+                    depotCode: 'COLAC',
+                    boardNo: 'RB-102',
+                    driver: 'John Smith',
+                    vehicle: 'BUS-12 (BS02AB)',
+                    chassis: 'Volvo B7R / Custom',
+                    route: 'School Run #4 - High School',
+                    signOn: '07:00',
+                    exit: '07:20',
+                    meal: '12:00 - 12:45',
+                    signOff: '16:15',
+                    status: 'Pending'
+                }
+            ]
+        };
+
+        // INITIALIZE
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('filterDate').value = today;
+        });
+
+        // HANDLE LOGIN GATE
+        function handleLogin(e) {
+            e.preventDefault();
+            const code = document.getElementById('depotCodeInput').value.trim().toUpperCase();
+            
+            if (code === 'SYV') {
+                // MASTER BACKEND GATE
+                state.activeDepot = 'SYV';
+                showView('viewMasterPortal');
+                renderMasterPortal();
+            } else if (state.depots[code]) {
+                // VALID DEPOT CODE
+                state.activeDepot = code;
+                showView('viewAllocationBoard');
+                renderAllocations();
+            } else {
+                alert('Invalid Depot Access Code. For Master Portal, enter SYV.');
+            }
+        }
+
+        // VIEW SWITCHER
+        function showView(viewId) {
+            ['viewLaunchGate', 'viewAllocationBoard', 'viewMasterPortal'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+            
+            const headerActions = document.getElementById('headerActions');
+            if (viewId !== 'viewLaunchGate') {
+                headerActions.classList.remove('hidden');
+                document.getElementById('headerDepotCode').innerText = `DEPOT: ${state.activeDepot}`;
+            } else {
+                headerActions.classList.add('hidden');
+            }
+        }
+
+        // RENDER ALLOCATION BOARD
+        function renderAllocations() {
+            const grid = document.getElementById('allocationsGrid');
+            const depotData = state.depots[state.activeDepot];
+            document.getElementById('depotTitleHeader').innerText = `${depotData.name} Allocations`;
+
+            const filtered = state.allocations.filter(a => a.depotCode === state.activeDepot);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500 font-mono text-sm">No running board allocations for this date.</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(item => `
+                <div onclick="openDetailModal(${item.id})" class="glass-card rounded-2xl p-5 border border-white/10 cursor-pointer space-y-4 relative overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <span class="px-2.5 py-1 rounded bg-brand-500/20 text-brand-glow border border-brand-500/30 text-xs font-mono font-semibold">${item.boardNo}</span>
+                        <span class="px-2.5 py-1 rounded ${item.status === 'On Road' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'} text-xs font-semibold">${item.status}</span>
+                    </div>
+
+                    <div>
+                        <div class="text-xs text-gray-400 font-mono">DRIVER</div>
+                        <div class="text-lg font-bold text-white">${item.driver}</div>
+                        <div class="text-xs text-brand-glow font-medium mt-0.5">${item.route}</div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 font-mono text-xs">
+                        <div>
+                            <span class="text-gray-500 block text-[10px]">VEHICLE</span>
+                            <span class="text-white font-semibold">${item.vehicle}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 block text-[10px]">SIGN ON</span>
+                            <span class="text-white font-semibold">${item.signOn}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // RENDER MASTER PORTAL
+        function renderMasterPortal() {
+            const grid = document.getElementById('masterDepotsGrid');
+            grid.innerHTML = Object.values(state.depots).map(d => `
+                <div class="glass-panel p-5 rounded-xl border border-white/10 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono text-xs">${d.code}</span>
+                        <i class="fa-solid fa-building text-gray-400"></i>
+                    </div>
+                    <h4 class="font-bold text-white text-lg">${d.name}</h4>
+                    <button onclick="accessDepotFromMaster('${d.code}')" class="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white rounded-lg transition-all">Launch Depot Screen</button>
+                </div>
+            `).join('');
+        }
+
+        function accessDepotFromMaster(code) {
+            state.activeDepot = code;
+            showView('viewAllocationBoard');
+            renderAllocations();
+        }
+
+        // DETAIL MODAL LOGIC
+        function openDetailModal(id) {
+            const item = state.allocations.find(a => a.id === id);
+            if (!item) return;
+
+            document.getElementById('modalBoardBadge').innerText = item.boardNo;
+            document.getElementById('modalDriverName').innerText = item.driver;
+            document.getElementById('modalRouteService').innerText = item.route;
+            document.getElementById('modalSignOn').innerText = item.signOn;
+            document.getElementById('modalExit').innerText = item.exit;
+            document.getElementById('modalMeal').innerText = item.meal;
+            document.getElementById('modalSignOff').innerText = item.signOff;
+            document.getElementById('modalBusReg').innerText = item.vehicle;
+            document.getElementById('modalBusChassis').innerText = item.chassis;
+
+            document.getElementById('detailModal').classList.remove('hidden');
+            document.getElementById('detailModal').classList.add('flex');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.getElementById(modalId).classList.remove('flex');
+        }
+
+        function switchModalTab(tab) {
+            if (tab === 'sheet') {
+                document.getElementById('tabSheetContent').classList.remove('hidden');
+                document.getElementById('tabVehicleContent').classList.add('hidden');
+                document.getElementById('tabSheetBtn').className = 'py-2 rounded-lg bg-brand-500 text-white';
+                document.getElementById('tabVehicleBtn').className = 'py-2 rounded-lg text-gray-400 hover:text-white';
+            } else {
+                document.getElementById('tabSheetContent').classList.add('hidden');
+                document.getElementById('tabVehicleContent').classList.remove('hidden');
+                document.getElementById('tabSheetBtn').className = 'py-2 rounded-lg text-gray-400 hover:text-white';
+                document.getElementById('tabVehicleBtn').className = 'py-2 rounded-lg bg-brand-500 text-white';
+            }
+        }
+
+        function logout() {
+            state.activeDepot = null;
+            document.getElementById('depotCodeInput').value = '';
+            showView('viewLaunchGate');
+        }
+    </script>
+</body>
+</html>
