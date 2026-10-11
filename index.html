@@ -350,26 +350,39 @@
     </script>
 
     <script>
-        function handleLogin(e) {
-            e.preventDefault();
-            const code = document.getElementById('depotCodeInput').value.trim().toUpperCase();
-            
-            if (code === 'SYV') {
-                window.appState.activeDepot = 'SYV';
-                showView('viewMasterPortal');
-                renderMasterPortal();
-            } else if (window.appState.depots[code]) {
-                window.appState.activeDepot = code;
-                showView('viewAllocationBoard');
-                renderAllocations();
-            } else {
-                // Allow dynamic custom codes for testing
-                window.appState.depots[code] = { name: `${code} Operations Depot`, code: code };
-                window.appState.activeDepot = code;
-                showView('viewAllocationBoard');
-                renderAllocations();
-            }
+    function handleLogin(e) {
+        if (e) e.preventDefault();
+    
+        const input = document.getElementById('depotCodeInput');
+        if (!input) return;
+    
+        const code = input.value.trim().toUpperCase();
+        if (!code) {
+            alert('Please enter a Depot Access Code.');
+            return;
         }
+    
+        // Master Access Gateway
+        if (code === 'SYV') {
+            window.appState.activeDepot = 'SYV';
+            showView('viewMasterPortal');
+            renderMasterPortal();
+            return;
+        }
+    
+        // Auto-create or load dynamic depot code on the fly
+        if (!window.appState.depots[code]) {
+            window.appState.depots[code] = { 
+                name: `${code} Depot Operations`, 
+                code: code 
+            };
+        }
+    
+        window.appState.activeDepot = code;
+        showView('viewAllocationBoard');
+        renderAllocations();
+    }
+
 
         function showView(viewId) {
             ['viewLaunchGate', 'viewAllocationBoard', 'viewMasterPortal'].forEach(id => {
